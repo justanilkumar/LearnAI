@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learnify LMS — MongoDB & Mongoose Architecture Showcase</title>
+  <meta name="description" content="Production-ready Learning Management System demonstrating MongoDB aggregation pipelines, Mongoose schema modeling, JWT role authentication, quizzes, and certificates.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <a href="#courses" class="brand">
+      <span class="brand-dot"></span>
+      <div class="brand-text">
+        Learnify<span style="color: #ff3b5c;">.io</span>
+        <span class="brand-badge">MongoDB + Mongoose</span>
+      </div>
+    </a>
+
+    <!-- Navigation Tabs -->
+    <nav>
+      <ul class="nav-links">
+        <li class="nav-item active" data-tab="courses">
+          <button id="navBtnCourses">🌟 Explore</button>
+        </li>
+        <li class="nav-item" data-tab="plans">
+          <button id="navBtnPlans">💎 Personal Plan</button>
+        </li>
+        <li class="nav-item" data-tab="student">
+          <button id="navBtnStudent">👨‍🎓 Student Portal</button>
+        </li>
+        <li class="nav-item" data-tab="instructor" id="nav-instructor">
+          <button id="navBtnInstructor">📊 Instructor Studio</button>
+        </li>
+        <li class="nav-item" data-tab="verify">
+          <button id="navBtnVerify">📜 Verify Credential</button>
+        </li>
+        <li class="nav-item" data-tab="api-docs">
+          <button id="navBtnApi">⚡ REST API Docs</button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Header Actions: Auth, Demo Switcher & Reset -->
+    <div class="header-actions">
+      <div class="demo-switcher" id="demoSwitcherWrapper">
+        <label for="demoUserSelect">Demo Role:</label>
+        <select id="demoUserSelect" class="demo-select" title="Switch Demo Account">
+          <option value="alex.morgan@student.io">Alex Morgan (Student)</option>
+          <option value="priya.sharma@student.io">Priya Sharma (Graduated)</option>
+          <option value="sarah.chen@learnify.io">Dr. Sarah Chen (Instructor)</option>
+        </select>
+      </div>
+
+      <!-- Logged-in State: User Pill & Log Out button -->
+      <div class="user-pill-container" id="userPillContainer">
+        <div class="user-pill" id="userPill">
+          <img id="userAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="Avatar" class="user-avatar" />
+          <div class="user-info">
+            <div id="userName" class="user-name">Alex Morgan</div>
+            <div id="userRole" class="user-role-badge">STUDENT</div>
+          </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline-logout" onclick="handleLogout()" title="Log out of Learnify">
+          Log Out
+        </button>
+      </div>
+
+      <!-- Logged-out State: Log In & Register buttons -->
+      <div class="auth-buttons-group" id="authButtonsGroup" style="display: none;">
+        <button class="btn btn-login-ghost" onclick="openAuthModal('login')">Log In</button>
+        <button class="btn btn-register-cta" onclick="openAuthModal('register')">Register</button>
+      </div>
+
+      <button id="resetDbBtn" class="btn btn-secondary btn-sm" title="Reset sample database to default state">
+        🌱 Reset Demo Data
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="container" id="appContent">
+    <!-- Dynamic SPA content inserted by app.js -->
+  </main>
+
+  <!-- ========================================================== -->
+  <!-- SUBSCRIPTION PORTION (Personal Plan vs Individual Courses) -->
+  <!-- ========================================================== -->
+  <section class="subscription-section-wrapper" id="subscriptionSection">
+    
+    <!-- Top sticky/promo bar (Image 3) -->
+    <div class="subs-top-bar">
+      <div class="subs-top-bar-inner">
+        <div class="subs-top-bar-brand">
+          <span class="subs-top-brand-logo">🎓 Learnify</span>
+          <span class="subs-top-divider">|</span>
+          <span class="subs-top-brand-title">Personal Plan</span>
+        </div>
+        <div class="subs-top-bar-action">
+          <span class="subs-top-price-text">Starting at ₹500.00 per month. Cancel anytime.</span>
+          <button class="btn btn-purple-gradient subs-top-btn" onclick="handleStartSubscription()">Start subscription</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="subs-content-container">
+      
+      <!-- Subscription Pricing Cards (Image 3) -->
+      <div class="subs-cards-grid">
+        
+        <!-- Card 1: Personal Plan (Featured / Best value) -->
+        <div class="subs-card subs-card-featured">
+          <div class="subs-badge-banner">Best value</div>
+          <div class="subs-card-inner">
+            <div class="subs-card-head">
+              <h3 class="subs-card-title">Personal Plan</h3>
+              <p class="subs-card-subtitle">For continuous skill building</p>
+            </div>
+
+            <ul class="subs-features-list">
+              <li>
+                <span class="subs-check-icon">✓</span>
+                <span class="subs-feature-text"><strong>Explore thousands of expert-led courses</strong> across AI, tech, business &amp; more — with new content added every month</span>
+              </li>
+              <li>
+                <span class="subs-check-icon">✓</span>
+                <span class="subs-feature-text"><strong>Know where to focus</strong> with over 600 skills assessments</span>
+              </li>
+              <li>
+                <span class="subs-check-icon">✓</span>
+                <span class="subs-feature-text"><strong>Build skills by doing</strong> with 180+ labs, coding exercises &amp; 1800+ AI Role Plays</span>
+              </li>
+              <li>
+                <span class="subs-check-icon">✓</span>
+                <span class="subs-feature-text"><strong>Prepare for certifications</strong> with over 12000 cert prep courses and practice tests.</span>
+              </li>
+            </ul>
+
+            <div class="subs-card-pricing-box">
+              <div class="subs-price-headline">Starting at ₹500.00/mo</div>
+              <div class="subs-price-subheadline">Billed monthly or annually. Cancel anytime.</div>
+              <button class="btn btn-purple-cta" onclick="handleStartSubscription()">Start subscription</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Buy individual courses -->
+        <div class="subs-card subs-card-standard">
+          <div class="subs-card-inner">
+            <div class="subs-card-head">
+              <h3 class="subs-card-title">Buy individual courses</h3>
+              <p class="subs-card-subtitle">Learn anything</p>
+            </div>
+
+            <ul class="subs-features-list">
+              <li>
+                <span class="subs-check-icon">✓</span>
+                <span class="subs-feature-text">Lifetime access to one course</span>
+              </li>
+              <li class="subs-feature-disabled">
+                <span class="subs-cross-icon">⊘</span>
+                <span class="subs-feature-text">No skill assessments</span>
+              </li>
+              <li class="subs-feature-disabled">
+                <span class="subs-cross-icon">⊘</span>
+                <span class="subs-feature-text">No labs</span>
+              </li>
+            </ul>
+
+            <div class="subs-card-standard-footer">
+              <div class="subs-standard-price">₹599.00 - ₹7,900.00</div>
+              <div class="subs-standard-note">One-time purchase.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Testimonials Section ("What other learners are saying" - Image 2) -->
+      <div class="subs-testimonials-block">
+        <h2 class="subs-testimonials-heading">What other learners are saying</h2>
+        
+        <div class="subs-testimonials-grid">
+          
+          <!-- Testimonial 1 -->
+          <div class="subs-testimonial-card">
+            <div class="subs-quote-symbol">❝</div>
+            <p class="subs-quote-body">
+              The <strong>knowledge</strong> and <strong>confidence</strong> I gained directly helped me during placements. I was <strong>better prepared</strong>, more articulate, and more confident in interviews - and it ultimately played a key role in <strong>helping me secure my job</strong>.
+            </p>
+            <div class="subs-author">Adarsh A.</div>
+          </div>
+
+          <!-- Testimonial 2 -->
+          <div class="subs-testimonial-card">
+            <div class="subs-quote-symbol">❝</div>
+            <p class="subs-quote-body">
+              Personal Plan helped me take an <strong>honest look at my skills</strong> and see where I had room to grow. The <strong>assessments</strong> gave me a clear path forward, helping me keep pace with rapid changes in AI and <strong>stay ahead in my career</strong>.
+            </p>
+            <div class="subs-author">Richard H.</div>
+          </div>
+
+          <!-- Testimonial 3 -->
+          <div class="subs-testimonial-card">
+            <div class="subs-quote-symbol">❝</div>
+            <p class="subs-quote-body">
+              The <strong>value</strong> goes beyond simply learning something new. It helped me <strong>understand myself better</strong>, think more intentionally about my future, and <strong>build skills I can continue using</strong> as my goals and circumstances change.
+            </p>
+            <div class="subs-author">Weston D.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Trusted Companies Bar (Image 2) -->
+      <div class="subs-trust-block">
+        <p class="subs-trust-heading">Learnify is trusted by over 17,000 companies and millions of learners around the world</p>
+        <div class="subs-trust-logos-row">
+          <div class="trust-logo-box"><span class="trust-logo-badge">VOLKSWAGEN</span></div>
+          <div class="trust-logo-box"><span class="trust-logo-badge">SAMSUNG</span></div>
+          <div class="trust-logo-box"><span class="trust-logo-badge">CISCO</span></div>
+          <div class="trust-logo-box"><span class="trust-logo-badge" style="text-transform: lowercase; font-style: italic; font-weight: 800;">vimeo</span></div>
+          <div class="trust-logo-box"><span class="trust-logo-badge">P&amp;G</span></div>
+          <div class="trust-logo-box"><span class="trust-logo-badge">Hewlett Packard Enterprise</span></div>
+          <div class="trust-logo-box"><span class="trust-logo-badge" style="text-transform: lowercase; font-weight: 800; letter-spacing: 0.05em;">citi</span></div>
+          <div class="trust-logo-box"><span class="trust-logo-badge">ERICSSON</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- COMPREHENSIVE WHITE FOOTER (Image 1) - bg color: white     -->
+  <!-- ========================================================== -->
+  <footer class="learnify-white-footer" id="mainFooter">
+    <div class="footer-inner-container">
+
+      <!-- Section 1: In-demand Careers, Web Development, IT Certifications, Leadership -->
+      <div class="footer-columns-row">
+        
+        <div class="footer-column">
+          <h4 class="footer-heading">In-demand Careers</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="filterByKeyword('Data Scientist')">Data Scientist</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Full Stack')">Full Stack Web Developer</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Cloud')">Cloud Engineer</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Project Manager')">Project Manager</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Game Developer')">Game Developer</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('')">All Career Accelerators</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Web Development</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="filterByKeyword('Web Development')">Web Development</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('JavaScript')">JavaScript</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('React')">React JS</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Angular')">Angular</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Java')">Java</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">IT Certifications</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="filterByKeyword('AWS')">Amazon AWS</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Cloud Practitioner')">AWS Certified Cloud Practitioner</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Azure')">AZ-900: Microsoft Azure Fundamentals</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Solutions Architect')">AWS Certified Solutions Architect - Associate</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Kubernetes')">Kubernetes</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Leadership</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="filterByKeyword('Leadership')">Leadership</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Management')">Management Skills</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Project Management')">Project Management</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Productivity')">Personal Productivity</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Intelligence')">Emotional Intelligence</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Section 2: Certifications by Skill, Data Science, Communication, Business Analytics -->
+      <div class="footer-columns-row">
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Certifications by Skill</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="filterByKeyword('Cybersecurity')">Cybersecurity Certification</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Project Management')">Project Management Certification</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Cloud')">Cloud Certification</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Data Analytics')">Data Analytics Certification</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('HR')">HR Management Certification</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('')">See all Certifications</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Data Science</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="filterByKeyword('Data Science')">Data Science</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Python')">Python</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Machine Learning')">Machine Learning</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('ChatGPT')">ChatGPT</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Deep Learning')">Deep Learning</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Communication</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="filterByKeyword('Communication')">Communication Skills</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Presentation')">Presentation Skills</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Public Speaking')">Public Speaking</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Writing')">Writing</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('PowerPoint')">PowerPoint</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Business Analytics &amp; Intelligence</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="filterByKeyword('Excel')">Microsoft Excel</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('SQL')">SQL</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Power BI')">Microsoft Power BI</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Data Analysis')">Data Analysis</a></li>
+            <li><a href="#courses" onclick="filterByKeyword('Business Analysis')">Business Analysis</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Section 3: About, Discover Learnify, Learnify for Business, Legal & Accessibility -->
+      <div class="footer-columns-row footer-bottom-links-row">
+
+        <div class="footer-column">
+          <h4 class="footer-heading">About</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="openAboutModal()">About us</a></li>
+            <li><a href="#courses" onclick="alert('Careers: Join our fast-growing engineering & curriculum team! Email hr@learnify.io')">Careers</a></li>
+            <li><a href="#courses" onclick="alert('Contact: support@learnify.io | Mon-Fri 9AM-6PM EST')">Contact us</a></li>
+            <li><a href="#courses" onclick="alert('Learnify Engineering Blog: Insights on MongoDB aggregation and ML pipelines.')">Blog</a></li>
+            <li><a href="#courses" onclick="alert('Investor Relations: Contact founders@learnify.io')">Investors</a></li>
+            <li><a href="#courses">Find more on Learnify</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Discover Learnify</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="alert('Mobile App: Learnify for iOS & Android coming soon!')">Get the app</a></li>
+            <li><a href="#instructor">Teach on Learnify</a></li>
+            <li><a href="#plans" onclick="scrollToPlans()">Plans and Pricing</a></li>
+            <li><a href="#courses" onclick="alert('Affiliate Program: Earn 20% on every referral!')">Affiliate</a></li>
+            <li><a href="#api-docs">Help and Support</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Learnify for Business</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="alert('Learnify for Business: Enterprise training with customized MongoDB schemas, team analytics, and dedicated mentors.')">Learnify Business</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Legal &amp; Accessibility</h4>
+          <ul class="footer-links">
+            <li><a href="#courses" onclick="alert('Accessibility: Built adhering to WCAG 2.1 AA web accessibility guidelines.')">Accessibility statement</a></li>
+            <li><a href="#courses" onclick="alert('Privacy Policy: We respect your privacy and never sell learner personal data.')">Privacy policy</a></li>
+            <li><a href="#courses" onclick="alert('Sitemap: /courses, /student, /instructor, /verify, /api-docs, /plans')">Sitemap</a></li>
+            <li><a href="#courses" onclick="alert('Terms: Learnify platform educational terms of service.')">Terms</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Bottom Bar: Brand, Copyright, Language Selector -->
+      <div class="footer-meta-bar">
+        <div class="footer-meta-left">
+          <a href="#courses" class="footer-brand-logo">
+            <span class="footer-logo-emoji">🎓</span>
+            <span class="footer-logo-text">Learnify<span class="footer-logo-accent">.io</span></span>
+          </a>
+          <span class="footer-copyright-text">© 2026 Learnify, Inc. All rights reserved.</span>
+        </div>
+
+        <div class="footer-meta-right">
+          <button class="footer-language-btn" onclick="alert('Language: English (US)')">
+            <span class="footer-globe-icon">🌐</span> English
+          </button>
+          <span class="footer-tech-tag">MongoDB &amp; Mongoose Full-Stack LMS</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Subscription Confirmation Modal -->
+  <div class="modal-overlay" id="subSuccessModal">
+    <div class="modal-box" style="max-width: 580px; text-align: center; padding: 2.5rem;">
+      <div style="font-size: 3.5rem; margin-bottom: 1rem;">🎉</div>
+      <h2 style="font-size: 1.8rem; margin-bottom: 0.8rem; color: #fff;">Welcome to Personal Plan!</h2>
+      <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1.8rem;">
+        Your Personal Plan subscription is now active at <strong>₹500.00/mo</strong>. You now have unlimited access to over 12,000+ expert-led courses, 600+ skills assessments, and 180+ interactive labs.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <button class="btn btn-primary" onclick="closeSubModal()">Start Learning Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal (Log In & Register) -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box auth-modal-box">
+      <div class="modal-header auth-modal-header">
+        <div class="auth-tabs-toggle">
+          <button type="button" class="auth-tab-btn active" id="authTabLoginBtn" onclick="switchAuthTab('login')">Log In</button>
+          <button type="button" class="auth-tab-btn" id="authTabRegisterBtn" onclick="switchAuthTab('register')">Create Account</button>
+        </div>
+        <button class="modal-close-btn" onclick="closeAuthModal()">&times;</button>
+      </div>
+
+      <div class="modal-body auth-modal-body">
+        
+        <!-- Login Form -->
+        <form id="loginForm" onsubmit="submitLogin(event)">
+          <div class="auth-alert" id="loginAlert" style="display: none;"></div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required />
+          </div>
+
+          <div class="demo-quick-login-box">
+            <span class="demo-quick-label">⚡ 1-Click Demo Accounts:</span>
+            <div class="demo-pills-row">
+              <button type="button" class="demo-pill-btn" onclick="fillQuickLogin('alex.morgan@student.io', 'Password123!')">👨‍🎓 Alex (Student)</button>
+              <button type="button" class="demo-pill-btn" onclick="fillQuickLogin('sarah.chen@learnify.io', 'Password123!')">👩‍🏫 Dr. Chen (Instructor)</button>
+              <button type="button" class="demo-pill-btn" onclick="fillQuickLogin('priya.sharma@student.io', 'Password123!')">🎓 Priya (Graduated)</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full auth-submit-btn" id="loginSubmitBtn">
+            Sign In to Learnify
+          </button>
+
+          <p class="auth-switch-text">
+            Don't have an account? <a href="javascript:void(0)" onclick="switchAuthTab('register')">Register for free</a>
+          </p>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" onsubmit="submitRegister(event)" style="display: none;">
+          <div class="auth-alert" id="registerAlert" style="display: none;"></div>
+
+          <div class="form-group">
+            <label class="form-label" for="registerName">Full Name</label>
+            <input type="text" id="registerName" class="form-input" placeholder="e.g. Liam Walker" required maxlength="60" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="registerEmail">Email Address</label>
+            <input type="email" id="registerEmail" class="form-input" placeholder="liam.walker@example.com" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" class="form-input" placeholder="At least 6 characters" required minlength="6" />
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="registerRole">Account Role</label>
+              <select id="registerRole" class="form-input form-select">
+                <option value="student">Student (Learn &amp; Certify)</option>
+                <option value="instructor">Instructor (Create &amp; Teach)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="registerHeadline">Headline</label>
+              <input type="text" id="registerHeadline" class="form-input" placeholder="e.g. Backend Engineer" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full auth-submit-btn" id="registerSubmitBtn">
+            Create Account &amp; Start Learning
+          </button>
+
+          <p class="auth-switch-text">
+            Already have an account? <a href="javascript:void(0)" onclick="switchAuthTab('login')">Sign In</a>
+          </p>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Player Modal -->
+  <div class="modal-overlay" id="playerModal">
+    <div class="modal-box" id="playerModalContent">
+      <!-- Player content rendered dynamically -->
+    </div>
+  </div>
+
+  <!-- Quiz Modal -->
+  <div class="modal-overlay" id="quizModal">
+    <div class="modal-box" style="max-width: 780px;">
+      <div class="modal-header">
+        <h3>Assessment Quiz</h3>
+        <button class="modal-close-btn" onclick="closeQuizModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="quizModalBody">
+        <!-- Quiz content rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Certificate Viewer Modal -->
+  <div class="modal-overlay" id="certModal">
+    <div class="modal-box" style="max-width: 850px;">
+      <div class="modal-header">
+        <h3>Official Certificate of Completion</h3>
+        <button class="modal-close-btn" onclick="closeCertModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="certModalBody">
+        <!-- Certificate rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
